@@ -6,6 +6,7 @@ const qrcode = require('qrcode');
 const http = require('http');
 const fs = require('fs');
 const axios = require('axios');
+const port = process.env.PORT || 8000;
 const fileUpload = require('express-fileupload');
 const {phoneNumberFormatter} = require('./helpers/formatter');
 const { response } = require('express');
@@ -188,6 +189,6 @@ const fileUrl = req.body.file;
     });
 });
 
-server.listen(8000, function(){
+server.listen(port, function(){
     console.log('App running on *: '+8000);
 });
