@@ -41,7 +41,9 @@ app.get('/',(req,res) =>{
 });
 
 
-const client = new Client({ puppeteer: { 
+const client = new Client({ 
+    restartOnAuthFail: true,
+    puppeteer: { 
     headless: true, 
     args: [
         '--no-sandbox',
@@ -113,6 +115,20 @@ io.on('connection', function(socket){
             }
         });
     });
+
+    client.on('auth_failure', function(session) {
+        socket.emit('message', 'Auth failure, restarting...');
+      });
+    
+      client.on('disconnected', (reason) => {
+        socket.emit('message', 'Whatsapp is disconnected!');
+        fs.unlinkSync(SESSION_FILE_PATH, function(err) {
+            if(err) return console.log(err);
+            console.log('Session file deleted!');
+        });
+        client.destroy();
+        client.initialize();
+      });
 });
 
 const checkRegisteredNumber = async function(number) {
@@ -123,7 +139,8 @@ const checkRegisteredNumber = async function(number) {
 //send message
 app.post('/send-message',[
     body('number').notEmpty(),
-    body('message').notEmpty(),],async(req, res) => {
+    body('message').notEmpty(),
+],async(req, res) => {
     const errors = validationResult(req).formatWith(({msg}) => {
         return msg;
     });
@@ -190,5 +207,5 @@ const fileUrl = req.body.file;
 });
 
 server.listen(port, function(){
-    console.log('App running on *: '+8000);
+    console.log('App running on *: '+ port);
 });

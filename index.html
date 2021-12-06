@@ -114,6 +114,7 @@
     })
 
     socket.on('qr',function(src){
+      console.log(src)
         $('#qrcode').attr('src',src);
     })
 
